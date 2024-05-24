@@ -4,7 +4,7 @@ import matplotlib.animation as animation
 import serial
 import numpy as np
 import datetime as dt
-
+"""
 from serial.tools import list_ports
 port = list(list_ports.comports())
 for p in port:
@@ -47,7 +47,7 @@ data = Serial.read(2)
 print(data.hex())
 
 '''
-
+"""
 
 #some data up here
 
@@ -69,15 +69,28 @@ def FFT():
 
 
 
-
-
 def GUI():
     print("GUI")
 
 
 
+from serial.tools import list_ports
+
+def ChoosePort():
+    print("\n\n\n")
+    print("Please select a port from the list below\n")
+    port = list(list_ports.comports())
+    for i, p in enumerate(port):
+        print(f"{i+1}. {p.device}")
+    
+    choosenPort = int(input("\nPort: "))
+    
+    return port[choosenPort].device
+
 
 def FastSerial():
-    print("Serial Coms")
+    
+
+
 
 
