@@ -3,7 +3,8 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import serial
 import numpy as np
-import datetime as dt
+import time as theTime
+
 """
 from serial.tools import list_ports
 port = list(list_ports.comports())
@@ -55,12 +56,12 @@ class ArduinoData:
     """
     Arduino data stores the voltage and relative time from the live data, this allows for easy processing of the data,
     """
-    def __init__(self, voltage, time):
+    def __init__(self, voltage: np.int16, time: np.int32):
         self.voltage = voltage
         self.time = time
 
 
-Livedata = np.zeros(100000, dtype=object)
+Livedata = np.zeros(1000, dtype=object)
 
 
 
@@ -95,12 +96,47 @@ def ChoosePort():
     
     choosenPort = int(input("\nPort: "))
     
-    return port[choosenPort].device
+    return port[choosenPort-1].device
 
 
-def FastSerial():
+def FastSerial(Arduino):
+    #Fast Serial communications
+    RawData = Arduino.read(1)
+    if RawData.hex() == "ff":
+        #leading byte
+        Correctdata = Arduino.read(2)   
+        voltage = int.from_bytes(Correctdata, byteorder="big", signed=False) #read two bits convert to int
+        time = theTime.time_ns()
+        Livedata[1:] = Livedata[:-1]
+        Livedata[0] = ArduinoData(voltage, time)
     
 
+
+def plotData():
+    plt.plot(np.arange(1000), [Livedata[i].voltage for i in range(len(Livedata))], linewidth=2)
+    plt.show()
+
+
+class Method():
+    def __init__(self) -> None:
+        self.myport = ChoosePort()
+        self.serialData = serial.Serial(self.myport,2000000)
+
+        #begin GUI???
+
+    def loop(self):
+        FastSerial(self.serialData)
+        #print(Livedata[0].voltage)
+        #update GUI
+
+
+myProgram = Method()
+try:
+    while(1):
+        myProgram.loop()
+except KeyboardInterrupt:
+    plotData()
+    pass
 
 
 
