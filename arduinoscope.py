@@ -51,7 +51,7 @@ print(data.hex())
 
 #some data up here
 
-Livedata = np.zeros(100000, dtype=np.int16)
+Livedata = np.zeros(100000)
 
 
 
