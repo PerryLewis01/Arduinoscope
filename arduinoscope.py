@@ -51,7 +51,16 @@ print(data.hex())
 
 #some data up here
 
-Livedata = np.zeros(100000)
+class ArduinoData:
+    """
+    Arduino data stores the voltage and relative time from the live data, this allows for easy processing of the data,
+    """
+    def __init__(self, voltage, time):
+        self.voltage = voltage
+        self.time = time
+
+
+Livedata = np.zeros(100000, dtype=object)
 
 
 
