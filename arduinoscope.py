@@ -47,3 +47,27 @@ data = Serial.read(2)
 print(data.hex())
 
 '''
+
+
+#some data up here
+
+
+
+
+def FFT():
+    print("FFT")
+
+
+
+
+
+def GUI():
+    print("GUI")
+
+
+
+
+def FastSerial():
+    print("Serial Coms")
+
+
