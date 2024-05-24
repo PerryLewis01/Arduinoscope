@@ -72,7 +72,17 @@ def FFT():
 
 
 def GUI():
+
+    time= list()
+    livetime = 0  
+
+    while time < 10000:
+        vals = Livedata
+        plt.plot(time, vals)
+        plt.show() 
+        time.append(livetime)
     print("GUI")
+    
 
 
 
