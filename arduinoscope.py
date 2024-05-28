@@ -5,6 +5,8 @@ import serial
 import numpy as np
 import time as theTime
 
+from serial.tools import list_ports
+
 """
 from serial.tools import list_ports
 port = list(list_ports.comports())
@@ -52,6 +54,7 @@ print(data.hex())
 
 #some data up here
 
+
 class ArduinoData:
     """
     Arduino data stores the voltage and relative time from the live data, this allows for easy processing of the data,
@@ -64,9 +67,8 @@ class ArduinoData:
 Livedata = np.zeros(1000, dtype=object)
 
 
-
 def FFT():
-    print("FFT")
+    return np.fft.rfft(np.array([i.voltage() for i in Livedata]))
 
 
 
@@ -85,7 +87,6 @@ def GUI():
 
 
 
-from serial.tools import list_ports
 
 def ChoosePort():
     print("\n\n\n")
@@ -99,17 +100,43 @@ def ChoosePort():
     return port[choosenPort-1].device
 
 
-def FastSerial(Arduino):
+prevData = bytearray([255,0,0])
+prevTime = theTime.time_ns()/10000
+
+def FastSerial(Arduino, prevDataint = prevData, prevTimeint = prevTime):
     #Fast Serial communications
-    RawData = Arduino.read(1)
-    if RawData.hex() == "ff":
-        #leading byte
-        Correctdata = Arduino.read(2)   
-        voltage = int.from_bytes(Correctdata, byteorder="big", signed=False) #read two bits convert to int
-        time = theTime.time_ns()
-        Livedata[1:] = Livedata[:-1]
-        Livedata[0] = ArduinoData(voltage, time)
+
+    bytesToRead = Arduino.inWaiting()
+
+    if bytesToRead > 0 :
+        RawData = bytearray(Arduino.read(bytesToRead))
+        ReadTime = theTime.time_ns()/1000    # To be done as close as possible to reading the data
+
+        
     
+        RawData = prevDataint + RawData # joins old data to the new
+        if not(RawData[0]==255): # it must start with ff, if not shift to the next ff start
+            try:
+                RawData = RawData[RawData.index(b'\xff'):]
+            except ValueError: # when the data is corrupted return and don't process it. next buffer should work
+                return (prevDataint, prevTimeint)
+
+        print(RawData)
+        for i in range(round(len(RawData)/3)):
+            voltage = int.from_bytes(RawData[(3*i)+1:(3*i)+3], byteorder="big", signed=False)
+            time = ReadTime +  i * (6 * (ReadTime - prevTimeint)/ (len(RawData)))
+
+            #Shift Data
+            Livedata[1:] = Livedata[:-1]
+            Livedata[0] = ArduinoData(voltage, time)
+
+        prevDataint = RawData[round(len(RawData)/3)*3:]
+
+        prevTimeint = ReadTime
+
+    return (prevDataint, prevTimeint)   
+        
+        
 
 
 def plotData():
@@ -121,13 +148,21 @@ class Method():
     def __init__(self) -> None:
         self.myport = ChoosePort()
         self.serialData = serial.Serial(self.myport,2000000)
-
+        self.prevData = bytearray(b'\xff\x00\x00')
+        self.prevTime = theTime.time_ns()/1000
         #begin GUI???
 
+
+
     def loop(self):
-        FastSerial(self.serialData)
-        #print(Livedata[0].voltage)
+        a = FastSerial(self.serialData, prevDataint=self.prevData, prevTimeint=self.prevTime)
+        self.prevData, self.prevTime = a[0], a[1]
+
+
         #update GUI
+
+
+
 
 
 myProgram = Method()
