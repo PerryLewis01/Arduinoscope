@@ -84,27 +84,35 @@ def FFT():
     print("FFT")
 
 
+fig = plt.figure()
+ax = fig.add_subplot(1, 1, 1)
 
+def animate(i, xs, ys):   
 
-
-def GUI():
-    vals = Livedata.voltage
-    t = Livedata.time
-
-    # Animate data
+    # Add x and y to lists
+    xs = [Livedata[i].time for i in range(len(Livedata))]
+    ys = [Livedata[i].voltage for i in range(len(Livedata))]
+    """# Limit x and y lists to 20 items
+    xs = xs[-1000:]
+    ys = ys[-1000:]"""
+    # Draw x and y lists
     ax.clear()
-    ax.plot(t, vals)
+    ax.plot(xs, ys)
     # Format plot
     plt.xticks(rotation=45, ha='right')
     plt.subplots_adjust(bottom=0.30)
     plt.title('Data over Time')
+
+
+def GUI():
+    # Create figure for plotting
+
+    t = []
+    vals = []
+
     # Set up plot to call animate() function periodically
     anim = animation.FuncAnimation(fig, animate, fargs=(t, vals), interval=1000)
     plt.show()
-    
-    print("GUI")
-    
-
 
 
 
@@ -179,6 +187,7 @@ class Method():
         self.serialData = serial.Serial(self.myport,2000000)
         self.prevData = bytearray(b'\xff\x00\x00')
         self.prevTime = theTime.time_ns()/1000
+        GUI()
         #begin GUI???
 
 
@@ -186,7 +195,7 @@ class Method():
     def loop(self):
         a = FastSerial(self.serialData, prevDataint=self.prevData, prevTimeint=self.prevTime)
         self.prevData, self.prevTime = a[0], a[1]
-
+        
 
         #update GUI
 
