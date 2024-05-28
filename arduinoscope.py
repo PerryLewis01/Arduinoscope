@@ -120,15 +120,24 @@ def FastSerial(Arduino, prevDataint = prevData, prevTimeint = prevTime):
                 RawData = RawData[RawData.index(b'\xff'):]
             except ValueError: # when the data is corrupted return and don't process it. next buffer should work
                 return (prevDataint, prevTimeint)
-
+        #debug
         print(RawData)
-        for i in range(round(len(RawData)/3)):
-            voltage = int.from_bytes(RawData[(3*i)+1:(3*i)+3], byteorder="big", signed=False)
-            time = ReadTime +  i * (6 * (ReadTime - prevTimeint)/ (len(RawData)))
 
-            #Shift Data
-            Livedata[1:] = Livedata[:-1]
-            Livedata[0] = ArduinoData(voltage, time)
+        for i in range(round(len(RawData)/3)):
+            if RawData[(3*i)] == 255:
+                voltage = int.from_bytes(RawData[(3*i)+1:(3*i)+3], byteorder="big", signed=False)
+                time = ReadTime +  i * (6 * (ReadTime - prevTimeint)/ (len(RawData)))
+                
+                #Shift Data
+                Livedata[1:] = Livedata[:-1]
+                Livedata[0] = ArduinoData(voltage, time)
+            else: #shift data until we reach the next valid point
+                try:
+                    RawData = RawData[RawData.index(b'\xff'):]
+                except ValueError: # when the data is corrupted return and don't process it. next buffer should work
+                    return (prevDataint, prevTimeint)
+                
+
 
         prevDataint = RawData[round(len(RawData)/3)*3:]
 
@@ -140,7 +149,7 @@ def FastSerial(Arduino, prevDataint = prevData, prevTimeint = prevTime):
 
 
 def plotData():
-    plt.plot(np.arange(1000), [Livedata[i].voltage for i in range(len(Livedata))], linewidth=2)
+    plt.plot([Livedata[i].time for i in range(len(Livedata))], [Livedata[i].voltage for i in range(len(Livedata))], linewidth=2)
     plt.show()
 
 
