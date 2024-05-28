@@ -64,7 +64,9 @@ class ArduinoData:
         self.time = time
 
 
-Livedata = np.zeros(1000, dtype=object)
+Livedata = np.empty(1000, dtype=object)
+for i in range (len(Livedata)): Livedata[i] = ArduinoData(0,0) 
+
 
 
 def FFT():
@@ -144,13 +146,17 @@ def FastSerial(Arduino, prevDataint = prevData, prevTimeint = prevTime):
         print(RawData)
 
         for i in range(round(len(RawData)/3)):
-            if RawData[(3*i)] == 255:
+            if RawData[(3*i)] == 255 and (RawData[(3*i)+1]>>4) == 0:
                 voltage = int.from_bytes(RawData[(3*i)+1:(3*i)+3], byteorder="big", signed=False)
-                time = ReadTime +  i * (6 * (ReadTime - prevTimeint)/ (len(RawData)))
-                
-                #Shift Data
-                Livedata[1:] = Livedata[:-1]
-                Livedata[0] = ArduinoData(voltage, time)
+                time = prevTimeint +  i * (3 * (ReadTime - prevTimeint)/ (len(RawData)))
+                if (voltage < 4096 and voltage > 0 and (voltage - Livedata[1].voltage) < 2000):
+                    #Shift Data in
+                    Livedata[1:] = Livedata[:-1]
+                    Livedata[0] = ArduinoData(voltage, time)
+                else:
+                    #Data is corrupt ignore it. this will cause gaps
+                    pass 
+                    
             else: #shift data until we reach the next valid point
                 try:
                     RawData = RawData[RawData.index(b'\xff'):]
