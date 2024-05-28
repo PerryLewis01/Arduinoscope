@@ -68,20 +68,40 @@ Livedata = np.zeros(1000, dtype=object)
 
 
 def FFT():
-    return np.fft.rfft(np.array([i.voltage() for i in Livedata]))
+    fft_vals = np.fft.fft(Livedata.voltage)
+    freq = np.fft.fftfreq(Livedata.time)
+    # Animate data
+    ax.clear()
+    ax.plot(freq, fft_vals)
+    # Format plot
+    plt.xticks(rotation=45, ha='right')
+    plt.subplots_adjust(bottom=0.30)
+    plt.title('Data over Frequency')
+    # Set up plot to call animate() function periodically
+    anim = animation.FuncAnimation(fig, animate, fargs=(freq, fft_vals), interval=1000)
+    plt.show()
+
+    print("FFT")
+
+
 
 
 
 def GUI():
+    vals = Livedata.voltage
+    t = Livedata.time
 
-    time= list()
-    livetime = 0  
-
-    while time < 10000:
-        vals = Livedata
-        plt.plot(time, vals)
-        plt.show() 
-        time.append(livetime)
+    # Animate data
+    ax.clear()
+    ax.plot(t, vals)
+    # Format plot
+    plt.xticks(rotation=45, ha='right')
+    plt.subplots_adjust(bottom=0.30)
+    plt.title('Data over Time')
+    # Set up plot to call animate() function periodically
+    anim = animation.FuncAnimation(fig, animate, fargs=(t, vals), interval=1000)
+    plt.show()
+    
     print("GUI")
     
 
