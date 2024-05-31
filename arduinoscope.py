@@ -24,7 +24,7 @@ class ArduinoData:
         self.time = time
 
 
-Livedata = np.empty(1000, dtype=object)
+Livedata = np.empty(10000, dtype=object)
 for i in range (len(Livedata)): Livedata[i] = ArduinoData(0,0) 
 
 def ChoosePort():
@@ -78,10 +78,12 @@ class aquire_data:
                 if RawData[(3*i)] == 255 and (RawData[(3*i)+1]>>4) == 0:
                     voltage = int.from_bytes(RawData[(3*i)+1:(3*i)+3], byteorder="big", signed=False)
                     time = self.prevTime +  i * (3 * (ReadTime - self.prevTime)/ (len(RawData)))
+
                     if (voltage < 4096 and voltage > 0 and (voltage - Livedata[1].voltage) < 2000):
                         #Shift Data in
                         Livedata[1:] = Livedata[:-1]
                         Livedata[0] = ArduinoData(voltage, time)
+                        
                     else:
                         #Data is corrupt ignore it. this will cause gaps
                         pass 
@@ -115,13 +117,13 @@ app.layout = html.Div(
         html.H4('ArduinoScope Live Feed'),
         html.Div(id='live-update-text'),
         dcc.Dropdown(comPorts, comPorts[0], id='comPortSelection'),
-        dcc.Graph(id='live-update-graph'),
+        dcc.Graph(id='live-update-graph', style={'height': '100%'}),
         dcc.Interval(
             id='interval-component',
             interval=50, # in milliseconds
             n_intervals=0
         )
-    ], style={'height' : '80%'})
+    ], style={'height' : '100%'}), style={'height' : '80vh'}
 )
 
 """
@@ -150,8 +152,7 @@ def update_com_port(comPort):
               Input('interval-component', 'n_intervals'))
 def update_graph_live(n):
     
-    for i in range(10):
-        data_update.FastSerial()
+    data_update.FastSerial()
     fig = make_subplots(rows=2, cols=1, row_heights=[2,2])
     fig.add_trace(
         go.Line(x = [Livedata[i].time for i in range(len(Livedata))], y = [Livedata[i].voltage for i in range(len(Livedata))]),
