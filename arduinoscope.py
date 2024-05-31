@@ -74,25 +74,27 @@ class aquire_data:
             #debug
             #print(RawData)
 
+            print(3 * (ReadTime - self.prevTime)/ (len(RawData)))
             for i in range(round(len(RawData)/3)):
                 if RawData[(3*i)] == 255 and (RawData[(3*i)+1]>>4) == 0:
                     voltage = int.from_bytes(RawData[(3*i)+1:(3*i)+3], byteorder="big", signed=False)
                     time = self.prevTime +  i * (3 * (ReadTime - self.prevTime)/ (len(RawData)))
-
+                    
                     if (voltage < 4096 and voltage > 0 and (voltage - Livedata[1].voltage) < 2000):
                         #Shift Data in
                         Livedata[1:] = Livedata[:-1]
                         Livedata[0] = ArduinoData(voltage, time)
 
                     else:
-                        #Data is corrupt ignore it. this will cause gaps
-                        pass 
+                        #better than skipping to reduce gaps
+                        Livedata[1:] = Livedata[:-1]
+                        Livedata[0] = ArduinoData(Livedata[1].voltage, time)
                         
                 else: #shift data until we reach the next valid point
                     try:
                         RawData = RawData[RawData.index(b'\xff'):]
                     except ValueError: # when the data is corrupted return and don't process it. next buffer should work
-                        pass
+                        break
                     
 
 
@@ -162,13 +164,12 @@ def update_graph_live(n, width):
     )'''
     fig.add_trace(
         go.Line(x = [Livedata[i].time for i in range(len(Livedata)-1)], y = [Livedata[i].time - Livedata[i+1].time for i in range(len(Livedata)-1)]),
-        row=2, col=1
+        row=1, col=1
     )
     
     #fft trace
     fig.add_trace(
-        go.Line(x = [np.fft.fftfreq(Livedata[i].time for i in range(len(Livedata))).shape[-1]], 
-                y = [np.abs(np.fft.fft(Livedata[i].voltage for i in range(len(Livedata))))]),
+        go.Line(x = [Livedata[widthAdjust + i].time for i in range(len(Livedata)- widthAdjust)], y = [Livedata[widthAdjust + i].voltage for i in range(len(Livedata) - widthAdjust)]),
         row=2, col=1
     )
     
