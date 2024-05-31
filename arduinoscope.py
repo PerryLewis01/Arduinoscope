@@ -165,8 +165,8 @@ def update_graph_live(n, width):
     
     #fft trace
     fig.add_trace(
-        go.Line(x = [np.fft.fftfreq([Livedata[i].time for i in range(len(Livedata))]).shape[-1]], 
-                y = [np.abs(np.fft.fft([Livedata[i].voltage for i in range(len(Livedata))]))]),
+        go.Line(x = np.fft.fftfreq(len(Livedata)), 
+                y = np.abs(np.fft.fft([Livedata[i].voltage for i in range(len(Livedata))]))),
         row=2, col=1
     )
     
