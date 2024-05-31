@@ -156,9 +156,13 @@ def update_graph_live(n, width):
     widthAdjust = 10000 - round(width)
     data_update.FastSerial()
     fig = make_subplots(rows=2, cols=1, row_heights=[2,2])
-    fig.add_trace(
+    '''fig.add_trace(
         go.Line(x = [Livedata[widthAdjust + i].time for i in range(len(Livedata)- widthAdjust)], y = [Livedata[widthAdjust + i].voltage for i in range(len(Livedata) - widthAdjust)]),
         row=1, col=1
+    )'''
+    fig.add_trace(
+        go.Line(x = [Livedata[i].time for i in range(len(Livedata)-1)], y = [Livedata[i].time - Livedata[i+1].time for i in range(len(Livedata)-1)]),
+        row=2, col=1
     )
     
     fig.add_trace(
