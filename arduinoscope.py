@@ -83,7 +83,7 @@ class aquire_data:
                         #Shift Data in
                         Livedata[1:] = Livedata[:-1]
                         Livedata[0] = ArduinoData(voltage, time)
-                        
+
                     else:
                         #Data is corrupt ignore it. this will cause gaps
                         pass 
@@ -117,6 +117,7 @@ app.layout = html.Div(
         html.H4('ArduinoScope Live Feed'),
         html.Div(id='live-update-text'),
         dcc.Dropdown(comPorts, comPorts[0], id='comPortSelection'),
+        dcc.Slider(min=100, max=10000, marks=None, value=1000, id='my-slider'),
         dcc.Graph(id='live-update-graph', style={'height': '100%'}),
         dcc.Interval(
             id='interval-component',
@@ -149,13 +150,14 @@ def update_com_port(comPort):
 
 # Multiple components can update everytime interval gets fired.
 @callback(Output('live-update-graph', 'figure'),
-              Input('interval-component', 'n_intervals'))
-def update_graph_live(n):
-    
+              Input('interval-component', 'n_intervals'),
+              Input('my-slider', 'value'))
+def update_graph_live(n, width):
+    widthAdjust = 10000 - round(width)
     data_update.FastSerial()
     fig = make_subplots(rows=2, cols=1, row_heights=[2,2])
     fig.add_trace(
-        go.Line(x = [Livedata[i].time for i in range(len(Livedata))], y = [Livedata[i].voltage for i in range(len(Livedata))]),
+        go.Line(x = [Livedata[widthAdjust + i].time for i in range(len(Livedata)- widthAdjust)], y = [Livedata[widthAdjust + i].voltage for i in range(len(Livedata) - widthAdjust)]),
         row=1, col=1
     )
     
