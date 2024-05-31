@@ -165,10 +165,13 @@ def update_graph_live(n, width):
     fig.add_trace(
         go.Line(x = [Livedata[i].time for i in range(len(Livedata)-1)], y = [Livedata[i].time - Livedata[i+1].time for i in range(len(Livedata)-1)]),
         row=1, col=1
+        row=1, col=1
     )
     
     #fft trace
     fig.add_trace(
+        go.Line(x = [np.fft.fftfreq([Livedata[i].time for i in range(len(Livedata))]).shape[-1]], 
+                y = [np.abs(np.fft.fft([Livedata[i].voltage for i in range(len(Livedata))]))]),
         go.Line(x = [Livedata[widthAdjust + i].time for i in range(len(Livedata)- widthAdjust)], y = [Livedata[widthAdjust + i].voltage for i in range(len(Livedata) - widthAdjust)]),
         row=2, col=1
     )
