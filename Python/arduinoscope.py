@@ -188,7 +188,8 @@ app.layout = html.Div(
 
             ])
         ], style={'display':'grid', 'grid-template-columns':"8fr 2fr", 'grid-gap':'1vw', 'height':'90vh'}),
-        html.P(f'{(1/time_constant) //2} MHz max bandwidth')
+        html.P(f'{(1/time_constant) //2} MHz max bandwidth'),
+        html.P(f'Author : Perry Lewis')
     ], style={'height' : '100%'}), style={'height' : '90vh'}
 )
 
