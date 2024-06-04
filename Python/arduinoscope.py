@@ -127,14 +127,26 @@ def listPorts():
     return portchoice
 
 
+def ChoosePort():
+    print("\n\n\n")
+    print("Please select a port from the list below\n")
+    port = list(list_ports.comports())
+    for i, p in enumerate(port):
+        print(f"{i+1}. {p.device}")
+
+    choosenPort = int(input("\nPort: "))
+
+    return port[choosenPort-1].device
+
+
 
 
 ### Dash App
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-comPorts = listPorts()
+comPort = ChoosePort()
 
-arduino = serial.Serial(comPorts[2], 2000000)
+arduino = serial.Serial(comPort, 2000000)
 storage_a = DataStorage()
 storage_b = DataStorage()
 
@@ -143,7 +155,7 @@ app = Dash(__name__, external_stylesheets=external_stylesheets)
 app.layout = html.Div(
     html.Div([
         html.H4('ArduinoScope Live Feed', style={'text-align': 'center'}),
-        html.P(f'Port : {comPorts[2]}'),
+        html.P(f'Port : {comPort}'),
         html.Div([
 
             html.Div([
