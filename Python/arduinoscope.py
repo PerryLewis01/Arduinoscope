@@ -27,7 +27,7 @@ this is incredibly linier
 
 input to voltage
 
-voltage = -157.8630 * input + 1711.5077
+voltage = -6.33e-3 * input + 1.084e01
 
 
 ----------------------
